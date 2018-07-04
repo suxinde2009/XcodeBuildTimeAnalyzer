@@ -1,0 +1,6 @@
+framework module Pods_XcodeBuildTimeAnalyzer {
+  umbrella header "Pods-XcodeBuildTimeAnalyzer-umbrella.h"
+
+  export *
+  module * { export * }
+}
