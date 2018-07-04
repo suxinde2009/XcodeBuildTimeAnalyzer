@@ -20,7 +20,7 @@ Thanks RobertGummesson for sharing this [BuildTimeAnalyzer-for-Xcode
 ](https://github.com/RobertGummesson/BuildTimeAnalyzer-for-Xcode) 的基础上做一些个人使用的个性化定制。
 
 非常感谢 RobertGummesson 分享了 [BuildTimeAnalyzer-for-Xcode
-](https://github.com/RobertGummesson/BuildTimeAnalyzer-for-Xcode) 这么好用的库。
+](https://github.com/RobertGummesson/BuildTimeAnalyzer-for-Xcode) 这么好用的工具。
 
 
 
