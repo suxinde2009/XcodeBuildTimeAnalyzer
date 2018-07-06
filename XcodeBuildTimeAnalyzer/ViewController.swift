@@ -241,7 +241,6 @@ class ViewController: NSViewController {
     
     func configureMenuItems(showBuildTimesMenuItem: Bool) {
         if let appDelegate = NSApp.delegate as? AppDelegate {
-            appDelegate.configureMenuItems(showBuildTimesMenuItem: showBuildTimesMenuItem)
         }
     }
     
