@@ -77,12 +77,19 @@ class ViewController: NSViewController {
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var tableViewContainerView: NSScrollView!
     
+    @IBOutlet weak var exportContainerView: NSView!
+    @IBOutlet weak var logExportPathTextField: NSTextField!
+    
+    
     private let dataSource = ViewControllerDataSource()
     
     private var currentKey: String?
     private var nextDatabase: XcodeDatabase?
     
     private var processor = LogProcessor()
+    private let dateFormatter = DateFormatter()
+    
+    private var currentSelectProject: String = ""
     
     var processingState: ProcessingState = .waiting {
         didSet {
@@ -92,8 +99,30 @@ class ViewController: NSViewController {
     
     // MARK: Lifecycle
     
+    func configureDateFormatter() {
+        dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+    }
+    func generateCurrentTimeStamp() -> String! {
+        let date = Date()
+        let timeStamp = dateFormatter.string(from: date);
+        return timeStamp
+    }
+    
+    func configureDefaultLogExportPath() {
+        let desktopFolder = NSSearchPathForDirectoriesInDomains(.desktopDirectory, .userDomainMask, true).first!
+        
+        let timeStamp = generateCurrentTimeStamp()!
+        let csvFilePath = "\(desktopFolder)/\(currentSelectProject)_\(timeStamp).csv"
+        
+        logExportPathTextField.stringValue = csvFilePath
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        UserPrefs.windowShouldBeTopMost = false
+        
+        configureDateFormatter()
         
         configureLayout()
         
@@ -143,6 +172,8 @@ class ViewController: NSViewController {
     
     func showInstructions(_ show: Bool) {
         instructionsView.isHidden = !show
+        
+        exportContainerView.isHidden = show
         
         let views: [NSView] = [compileTimeTextField, leftButton, perFileButton, searchField, statusLabel, statusTextField, tableViewContainerView]
         views.forEach{ $0.isHidden = show }
@@ -204,10 +235,32 @@ class ViewController: NSViewController {
         NSWorkspace.shared.openFile(derivedDataTextField.stringValue)
     }
     
+    @IBAction func exportLogCsvFileButtonClicked(_ sender: NSButton) {
+        let path = logExportPathTextField.stringValue
+        guard path.count > 0 else {
+            NSAlert.show(withMessage: "需要输入选择csv文件导出路径")
+            return
+        }
+        let csvContent: String = dataSource.exportToCsvLogContent() as String!
+        let fileManager = FileManager.default
+        
+        if let data = csvContent.data(using: .utf8) {
+            let result = fileManager.createFile(atPath: path, contents: data, attributes: nil)
+            if result {
+                NSAlert.show(withMessage: "成功导出日志文件!")
+            } else {
+                NSAlert.show(withMessage: "导出日志文件失败!")
+            }
+        } else {
+            NSAlert.show(withMessage: "日志文件数据生成失败!")
+        }
+    }
+    
     
     @IBAction func cancelButtonClicked(_ sender: AnyObject) {
         processor.shouldCancel = true
     }
+    
     
     @IBAction func leftButtonClicked(_ sender: NSButton) {
         configureMenuItems(showBuildTimesMenuItem: true)
@@ -245,6 +298,9 @@ class ViewController: NSViewController {
     }
     
     func processLog(with database: XcodeDatabase) {
+        
+        configureDefaultLogExportPath()
+        
         guard processingState != .processing else {
             if let currentKey = currentKey, currentKey != database.key {
                 nextDatabase = database
@@ -370,6 +426,7 @@ extension ViewController: BuildManagerDelegate {
 
 extension ViewController: ProjectSelectionDelegate {
     func didSelectProject(with database: XcodeDatabase) {
+        currentSelectProject = database.schemeName
         processLog(with: database)
     }
 }

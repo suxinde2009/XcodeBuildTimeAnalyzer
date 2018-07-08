@@ -81,6 +81,15 @@ class ViewControllerDataSource {
         }
     }
     
+    public func exportToCsvLogContent() -> String! {
+        var csvContent: String = ""
+        csvContent.append("FileName, Code, Line, Time\r\n")
+        for item in processedData {
+            csvContent.append(item.convertToLogCsvLine())
+        }
+        return csvContent
+    }
+    
     private var originalData = [CompileMeasure]()
     private var processedData = [CompileMeasure]()
     

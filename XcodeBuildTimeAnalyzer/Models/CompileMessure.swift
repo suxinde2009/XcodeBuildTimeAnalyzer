@@ -62,11 +62,12 @@ import Foundation
 
 @objcMembers class CompileMeasure: NSObject {
     
-    dynamic var time: Double
-    var path: String
-    var code: String
-    dynamic var filename: String
-    var references: Int
+    dynamic var time: Double = 0
+    var path: String = ""
+    var code: String = ""
+    var codeLine: Int = 0
+    dynamic var filename: String = ""
+    var references: Int = 0
     
     private var locationArray: [Int]
     
@@ -102,7 +103,8 @@ import Foundation
         guard locations.count == 2 else { return nil }
         
         self.time = time
-        self.code = code
+        self.code = CompileMeasure.removeRandNfromLineForString(code)
+        self.codeLine = locations.first!
         self.path = filepath
         self.filename = filename
         self.locationArray = locations
@@ -134,5 +136,22 @@ import Foundation
         default:
             return code
         }
+    }
+    
+    public class func removeRandNfromLineForString(_ string: String?) -> String! {
+        var result = ""
+        guard string != nil else {
+            return ""
+        }
+        var tmp = string?.replacingOccurrences(of: "\r", with: "")
+        tmp = tmp?.replacingOccurrences(of: "\n", with: "")
+        if let tmpString = tmp {
+            result.append(tmpString)
+        }
+        return result
+    }
+    
+    public func convertToLogCsvLine() -> String! {
+        return "\(filename),\(code),\(codeLine),\(time)_ms \r\n"
     }
 }
